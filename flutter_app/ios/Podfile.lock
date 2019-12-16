@@ -1,0 +1,43 @@
+PODS:
+  - Flutter (1.0.0)
+  - GDTMobSDK (4.11.1):
+    - GDTMobSDK/GDTMobSDK (= 4.11.1)
+  - GDTMobSDK/GDTMobSDK (4.11.1)
+  - url_launcher (0.0.1):
+    - Flutter
+  - url_launcher_macos (0.0.1):
+    - Flutter
+  - url_launcher_web (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - GDTMobSDK (~> 4.11.1)
+  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
+  - url_launcher_macos (from `.symlinks/plugins/url_launcher_macos/ios`)
+  - url_launcher_web (from `.symlinks/plugins/url_launcher_web/ios`)
+
+SPEC REPOS:
+  trunk:
+    - GDTMobSDK
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  url_launcher:
+    :path: ".symlinks/plugins/url_launcher/ios"
+  url_launcher_macos:
+    :path: ".symlinks/plugins/url_launcher_macos/ios"
+  url_launcher_web:
+    :path: ".symlinks/plugins/url_launcher_web/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  GDTMobSDK: 27df871824b9072857d274f8749aba31bb13a674
+  url_launcher: a1c0cc845906122c4784c542523d8cacbded5626
+  url_launcher_macos: fd7894421cd39320dce5f292fc99ea9270b2a313
+  url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
+
+PODFILE CHECKSUM: 0b10f69b3c2d06f813db8ff8a89c83c27a10876a
+
+COCOAPODS: 1.8.3
