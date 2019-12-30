@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,52 +15,27 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  String _fontPath;
+  bool _fontDownloaded = false;
+  String _fontStyle;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    checkFont();
+    super.initState();
   }
 
   @override
@@ -71,49 +50,98 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('Font test'),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              '如果点击按钮能够跳转网页，说明插件加载正常',
+              'Font Style Test',
+              style: TextStyle(fontFamily: _fontStyle, fontSize: 20.0),
             ),
             Icon(
               FontAwesomeIcons.crown,
               size: 30.0,
             ),
+            _fontDownloaded
+                ? Text("Download finish")
+                : Text("Not Download yet"),
             RaisedButton(
               onPressed: () async {
-                await launch('https://www.baidu.com');
+                download();
               },
-              child: Text('CLICK'),
+              child: Text('1. Download Font'),
+            ),
+            RaisedButton(
+              onPressed: () async {
+                await readFont(
+                    _fontPath + '/RichieBrusher.ttf', 'RichieBrusher');
+                setState(() {
+                  _fontStyle = 'RichieBrusher';
+                });
+              },
+              child: Text('2. Use font'),
             )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<void> download() async {
+    // Download font
+    ProgressCallback onDownloadProgress = (int received, int total) async {
+      print('DOWN$received');
+      print('DOWN$total');
+      double progress = received / total;
+      if (progress == 1) {
+        print('Download finish');
+        setState(() {
+          _fontDownloaded = true;
+        });
+      } else {
+        print('Downloading');
+      }
+    };
+    Dio dio = new Dio();
+
+    await dio.download("http://pics.xiaomilu.top/RichieBrusher.ttf",
+        _fontPath + '/RichieBrusher.ttf',
+        onReceiveProgress: onDownloadProgress);
+  }
+
+  Future<bool> isDirectoryExist(String path) async {
+    File file = File(path);
+    return await file.exists();
+  }
+
+  Future<void> createDirectory(String path) async {
+    Directory directory = Directory(path);
+    directory.create();
+  }
+
+  Future<void> readFont(String path, String name) async {
+    var fontLoader = FontLoader(name); //自定义名字
+    fontLoader.addFont(getCustomFont(path));
+    await fontLoader.load();
+  }
+
+  Future<ByteData> getCustomFont(String path) async {
+    ByteData byteData = await rootBundle.load(path);
+    return byteData;
+  }
+
+  Future<void> checkFont() async {
+    _fontPath = (await getApplicationDocumentsDirectory()).path + "/font";
+    bool exist = await isDirectoryExist(_fontPath); //判定目录是否存在 - 不存在就创建
+    if (!exist) {
+      await createDirectory(_fontPath);
+    }
+
+    _fontDownloaded = await isDirectoryExist(_fontPath + '/RichieBrusher.ttf');
+    setState(() {});
   }
 }
